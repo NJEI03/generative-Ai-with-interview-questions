@@ -10,5 +10,19 @@ generator = pipeline('text-generation', model='distilgpt2')
 
 #Defining wjat my API expects, which is a prompt string
 
-class Request:(BaseModel):
-prompt: str
+class Request(BaseModel):
+    prompt: str
+
+# Creating the endpoint
+@app.post('/hello-llm')
+def generate_text(request: Request):
+    #Calling the model
+    result = generator(request.prompt, max_length=50)
+    print(result)
+    # Return the generated text
+    return{
+        "generated_text": result[0]['generated_text']
+    }
+
+    
+
