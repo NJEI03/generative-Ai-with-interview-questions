@@ -2,6 +2,9 @@ Exercise 1 done
 Exercise 2 done
 Exercise 3 done
 Exercise 4 completed
+exercise 5 done
+exercise 6 done
 
 Challenges
-Model size to large to download
+Models size to large to download
+Model capability is limited to generate better responses
