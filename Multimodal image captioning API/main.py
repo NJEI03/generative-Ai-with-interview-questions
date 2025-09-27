@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File
 from PIL import Image
 from transformers import pipeline
 
@@ -11,4 +11,6 @@ async def caption_image(file: UploadFile = File(...)):
     #reading the uploaded images
     image= Image.open(file.file)
 
-    
+    #Generating caption
+    result=captioner(image)
+
