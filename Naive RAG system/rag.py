@@ -37,12 +37,13 @@ def rag_query(question: str):
     relevant_docs = retriever.invoke(question)
     context = "\n\n".join([doc.page_content for doc in relevant_docs[:3]])
     
-    prompt = f"""Answer based only on this context:
+    prompt = f"""Use ONLY the following context to answer the question. Do not use any other knowledge:
 
 Context:
 {context}
 
 Question: {question}
+If the answer is not in the context, say "I cannot find the answer in the provided documents
 
 Answer:"""
     
