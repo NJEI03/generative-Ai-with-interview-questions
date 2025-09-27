@@ -14,3 +14,7 @@ async def caption_image(file: UploadFile = File(...)):
     #Generating caption
     result=captioner(image)
 
+    return{
+        "caption": result[0]['generated_text']
+    }
+#Model is about 500MBs

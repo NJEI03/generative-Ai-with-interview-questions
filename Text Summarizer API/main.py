@@ -23,3 +23,4 @@ def summarize_text(request:SummaryRequest):
     return{
         "summary": result[0]['summary_text']
     }
+#Model is about 1.6GB

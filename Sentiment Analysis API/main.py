@@ -19,3 +19,4 @@ def analyze_sentiment(request:SentimentRequest ):
         "sentiment": result['label'],
         "confidence": round(result['score'], 4) # round to 4 decimal places
     } 
+#Model is 269MB
