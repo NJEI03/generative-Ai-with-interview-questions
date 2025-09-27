@@ -1,38 +1,54 @@
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.llms import HuggingFacePipeline
+from transformers import pipeline as hf_pipeline
+from document_loader import load_documents_from_folder
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.schema import Document
 
-# 1. Initialize embedding model
+# Initialize embedding model
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# 2. Create your knowledge base (simple example)
-documents = [
-    "Paul Biya has been the president of Cameroon since 1982.",
-    "FastAPI is a modern Python web framework for building APIs.",
-    "The capital of France is Paris."
-]
+# Initialize LLM for answer generation
+llm_pipeline = hf_pipeline(
+    "text-generation",
+    model="distilgpt2",
+    max_new_tokens=100,
+    temperature=0.3
+)
+llm = HuggingFacePipeline(pipeline=llm_pipeline)
 
-# 3. Split documents into chunks
-text_splitter = CharacterTextSplitter(chunk_size=200, chunk_overlap=0)
-docs = [Document(page_content=text) for text in documents]
-texts = text_splitter.split_documents(docs)
+def initialize_rag():
+    """Load documents and create vector store"""
+    documents = load_documents_from_folder("data")
+    
+    if not documents:
+        # Fallback to simple examples
+        documents = [Document(page_content="No documents found in /data folder.")]
+    
+    vector_store = Chroma.from_documents(documents, embeddings)
+    return vector_store.as_retriever()
 
-# 4. Create vector store
-vector_store = Chroma.from_documents(texts, embeddings)
-
-# 5. Create retriever
-retriever = vector_store.as_retriever()
+# Initialize when app starts
+retriever = initialize_rag()
 
 def rag_query(question: str):
-    # 6. Retrieve relevant documents
-    relevant_docs = retriever.get_relevant_documents(question)
+    # Use invoke() instead of get_relevant_documents()
+    relevant_docs = retriever.invoke(question)
+    context = "\n\n".join([doc.page_content for doc in relevant_docs[:3]])
     
-    # 7. Simple RAG: use the first relevant doc as context
-    context = relevant_docs[0].page_content if relevant_docs else "No relevant information found."
+    prompt = f"""Answer based only on this context:
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
     
+    answer = llm.invoke(prompt)
     return {
         "question": question,
-        "context": context,
-        "answer": f"Based on the context: {context}"  # In next step, we'll use an LLM here
+        "contexts": [doc.page_content for doc in relevant_docs[:2]],
+        "answer": answer
     }
