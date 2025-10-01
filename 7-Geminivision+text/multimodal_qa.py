@@ -1,9 +1,8 @@
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-from fastapi import UploadFile, File
 from PIL import Image
-import io
+
 
 load_dotenv()
 
@@ -18,5 +17,4 @@ def analyze_image_with_question(image: Image.Image, question : str):
         return response.text
     except Exception as e:
         return f"Error: {str(e)}"
-    
     
